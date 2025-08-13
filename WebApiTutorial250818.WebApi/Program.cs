@@ -41,7 +41,10 @@ namespace WebApiTutorial250818.WebApi
 
             //if (app.Environment.IsDevelopment())
             //{
-                app.UseSwagger();
+                app.UseSwagger(c =>
+                {
+                    c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
+                });
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "School API v1");
