@@ -43,9 +43,9 @@ namespace WebApiTutorial250818.WebApi.Services
             var s = await _repo.GetByIdAsync(id, ct);
             if (s is null) return false;
 
-            s.FirstName = dto.FirstName == "string" || dto.FirstName.IsNullOrEmpty() ? s.FirstName : dto.FirstName;
-            s.LastName = dto.LastName == "string" || dto.LastName.IsNullOrEmpty() ? s.LastName : dto.LastName;
-            s.Email = dto.Email == "string" || dto.Email.IsNullOrEmpty() ? s.Email : dto.Email;
+            s.FirstName = dto.FirstName;
+            s.LastName = dto.LastName;
+            s.Email = dto.Email;
             s.BirthDate = dto.BirthDate;
 
             await _repo.UpdateAsync(s, ct);
