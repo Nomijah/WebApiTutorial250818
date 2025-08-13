@@ -1,4 +1,9 @@
 
+using Microsoft.EntityFrameworkCore;
+using WebApiTutorial250818.WebApi.Data;
+using WebApiTutorial250818.WebApi.Repositories;
+using WebApiTutorial250818.WebApi.Services;
+
 namespace WebApiTutorial250818.WebApi
 {
     public class Program
@@ -7,16 +12,27 @@ namespace WebApiTutorial250818.WebApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // DbContext (SQLite)
+            builder.Services.AddDbContext<SchoolContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // DI: Repository + Service
+            builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Skapa DB och kör ev. pending migrations vid start (utbildningssyfte)
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+                db.Database.Migrate(); // skapar db + kör migrations
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -24,10 +40,6 @@ namespace WebApiTutorial250818.WebApi
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
