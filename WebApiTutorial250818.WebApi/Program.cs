@@ -12,14 +12,14 @@ namespace WebApiTutorial250818.WebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // DbContext (SQLite)
+           
             builder.Services.AddDbContext<SchoolContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // DI: Repository + Service
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+
+            builder.Services.AddAutoMapper(typeof(Program)); // AutoMapper för DTOs
 
             builder.Services.AddControllers()
                 .AddNewtonsoftJson();

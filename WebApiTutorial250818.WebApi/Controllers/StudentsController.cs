@@ -42,7 +42,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
 
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> Patch(int id,
-                [FromBody] JsonPatchDocument<Student> patchDoc,
+                [FromBody] JsonPatchDocument<StudentPatchDto> patchDoc,
                 CancellationToken ct)
         {
             if (patchDoc is null)

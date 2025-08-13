@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using WebApiTutorial250818.WebApi.DTOs;
@@ -10,30 +11,29 @@ namespace WebApiTutorial250818.WebApi.Services
     public class StudentService : IStudentService
     {
         private readonly IStudentRepository _repo;
+        private readonly IMapper _mapper;
 
-        public StudentService(IStudentRepository repo) => _repo = repo;
+        public StudentService(IStudentRepository repo, IMapper mapper)
+        {
+            _repo = repo;
+            _mapper = mapper;
+        }
 
         public async Task<List<StudentReadDto>> GetAllAsync(CancellationToken ct = default)
         {
             var students = await _repo.GetAllAsync(ct);
-            return students.Select(ToReadDto).OrderBy(s => s.Id).ToList();
+            return _mapper.Map<List<StudentReadDto>>(students);
         }
 
         public async Task<StudentReadDto?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             var s = await _repo.GetByIdAsync(id, ct);
-            return s is null ? null : ToReadDto(s);
+            return _mapper.Map<StudentReadDto?>(s);
         }
 
         public async Task<int> CreateAsync(StudentCreateDto dto, CancellationToken ct = default)
         {
-            var s = new Student
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                BirthDate = dto.BirthDate
-            };
+            var s = _mapper.Map<Student>(dto);
 
             await _repo.AddAsync(s, ct);
             await _repo.SaveChangesAsync(ct);
@@ -45,21 +45,23 @@ namespace WebApiTutorial250818.WebApi.Services
             var s = await _repo.GetByIdAsync(id, ct);
             if (s is null) return false;
 
-            s.FirstName = dto.FirstName;
-            s.LastName = dto.LastName;
-            s.Email = dto.Email;
-            s.BirthDate = dto.BirthDate;
+            _mapper.Map(dto, s); // uppdaterar bara de mappade egenskaperna
 
             await _repo.UpdateAsync(s, ct);
             return await _repo.SaveChangesAsync(ct);
         }
 
-        public async Task<bool> PatchAsync(int id, JsonPatchDocument<Student> patchDoc, CancellationToken ct = default)
+        public async Task<bool> PatchAsync(int id, JsonPatchDocument<StudentPatchDto> patchDoc, CancellationToken ct = default)
         {
             var student = await _repo.GetByIdAsync(id, ct);
             if (student is null) return false;
 
-            patchDoc.ApplyTo(student); // modifierar bara det som klienten skickar in
+            // Skapa en DTO för patchning
+            var studentPatchDto = _mapper.Map<StudentPatchDto>(student);
+
+            patchDoc.ApplyTo(studentPatchDto); // modifierar bara det som klienten skickar in
+
+            _mapper.Map(studentPatchDto, student); // uppdaterar student med patchade värden
 
             await _repo.UpdateAsync(student, ct);
             return await _repo.SaveChangesAsync(ct);
@@ -73,13 +75,5 @@ namespace WebApiTutorial250818.WebApi.Services
             await _repo.DeleteAsync(s, ct);
             return await _repo.SaveChangesAsync(ct);
         }
-
-        private static StudentReadDto ToReadDto(Student s) => new()
-        {
-            Id = s.Id,
-            FullName = $"{s.FirstName} {s.LastName}",
-            Email = s.Email,
-            BirthDate = s.BirthDate
-        };
     }
 }
