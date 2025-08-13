@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Models;
 using WebApiTutorial250818.WebApi.Repositories;
@@ -49,6 +51,25 @@ namespace WebApiTutorial250818.WebApi.Services
             s.BirthDate = dto.BirthDate;
 
             await _repo.UpdateAsync(s, ct);
+            return await _repo.SaveChangesAsync(ct);
+        }
+
+        public async Task<bool> PatchAsync(int id, JsonPatchDocument<StudentPatchDto> patchDoc, CancellationToken ct = default)
+        {
+            var student = await _repo.GetByIdAsync(id, ct);
+            if (student is null) return false;
+
+            var studentToPatch = new StudentPatchDto
+            {
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                BirthDate = student.BirthDate
+            };
+
+            patchDoc.ApplyTo(studentToPatch); // modifierar bara det som klienten skickar in
+
+            await _repo.UpdateAsync(student, ct);
             return await _repo.SaveChangesAsync(ct);
         }
 

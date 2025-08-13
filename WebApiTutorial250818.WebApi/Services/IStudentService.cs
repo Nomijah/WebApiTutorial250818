@@ -1,4 +1,5 @@
-﻿using WebApiTutorial250818.WebApi.DTOs;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using WebApiTutorial250818.WebApi.DTOs;
 
 namespace WebApiTutorial250818.WebApi.Services
 {
@@ -8,6 +9,7 @@ namespace WebApiTutorial250818.WebApi.Services
         Task<StudentReadDto?> GetByIdAsync(int id, CancellationToken ct = default);
         Task<int> CreateAsync(StudentCreateDto dto, CancellationToken ct = default);
         Task<bool> UpdateAsync(int id, StudentUpdateDto dto, CancellationToken ct = default);
+        Task<bool> PatchAsync(int id, JsonPatchDocument<StudentPatchDto> patchDoc, CancellationToken ct = default);
         Task<bool> DeleteAsync(int id, CancellationToken ct = default);
     }
 }

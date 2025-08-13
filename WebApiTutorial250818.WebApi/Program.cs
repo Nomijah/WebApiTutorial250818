@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using WebApiTutorial250818.WebApi.Data;
 using WebApiTutorial250818.WebApi.Repositories;
 using WebApiTutorial250818.WebApi.Services;
@@ -20,9 +21,14 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddNewtonsoftJson();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(o =>
+            {
+                o.SwaggerDoc("v1", new OpenApiInfo { Title = "School API", Version = "v1" });
+            });
+            builder.Services.AddSwaggerGenNewtonsoftSupport();
 
             var app = builder.Build();
 
@@ -33,11 +39,14 @@ namespace WebApiTutorial250818.WebApi
                 db.Database.Migrate(); // skapar db + kör migrations
             }
 
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "School API v1");
+                });
+            //}
 
             app.UseHttpsRedirection();
             app.MapControllers();

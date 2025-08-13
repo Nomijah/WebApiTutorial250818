@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using WebApiTutorial250818.WebApi.DTOs;
+using WebApiTutorial250818.WebApi.Models;
 using WebApiTutorial250818.WebApi.Services;
 
 namespace WebApiTutorial250818.WebApi.Controllers
@@ -36,6 +38,18 @@ namespace WebApiTutorial250818.WebApi.Controllers
         {
             var ok = await _service.UpdateAsync(id, dto, ct);
             return ok ? NoContent() : NotFound();
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<IActionResult> Patch(int id,
+                [FromBody] JsonPatchDocument<StudentPatchDto> patchDoc,
+                CancellationToken ct)
+        {
+            if (patchDoc is null)
+                return BadRequest();
+
+            var result = await _service.PatchAsync(id, patchDoc, ct);
+            return result ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:int}")]
