@@ -16,6 +16,9 @@ namespace WebApiTutorial250818.WebApi.Repositories
         public Task<Course?> GetByIdAsync(int id, CancellationToken ct = default) =>
             _ctx.Courses.FirstOrDefaultAsync(c => c.Id == id, ct);
 
+        public Task<Course?> GetByTitleAsync(string title, CancellationToken ct = default) =>
+            _ctx.Courses.FirstOrDefaultAsync(c => c.Title == title, ct);
+
         public async Task AddAsync(Course course, CancellationToken ct = default)
         {
             await _ctx.Courses.AddAsync(course, ct);

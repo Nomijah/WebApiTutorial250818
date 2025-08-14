@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApiTutorial250818.WebApi.Common;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Services;
 
@@ -20,25 +21,25 @@ namespace WebApiTutorial250818.WebApi.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(CourseReadDto), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<CourseReadDto>> GetById(int id, CancellationToken ct)
+        public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
             var result = await _service.GetByIdAsync(id, ct);
-            return result is null ? NotFound() : Ok(result);
+            return result.ToActionResult(this, value => Ok(value));
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(CourseReadDto), 201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CourseReadDto>> Create([FromBody] CourseCreateDto dto, CancellationToken ct)
+        [ProducesResponseType(409)]
+        public async Task<IActionResult> Create([FromBody] CourseCreateDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);
             }
 
-            var id = await _service.CreateAsync(dto, ct);
-            var created = await _service.GetByIdAsync(id, ct);
-            return CreatedAtAction(nameof(GetById), new { id }, created);
+            var result = await _service.CreateAsync(dto, ct);
+            return result.ToActionResult(this, id => CreatedAtAction(nameof(GetById), new { id }, null));
         }
 
         [HttpPut("{id:int}")]
@@ -51,8 +52,8 @@ namespace WebApiTutorial250818.WebApi.Controllers
             {
                 return ValidationProblem(ModelState);
             }
-            var ok = await _service.UpdateAsync(id, dto, ct);
-            return ok ? NoContent() : NotFound();
+            var result = await _service.UpdateAsync(id, dto, ct);
+            return result.ToActionResult(this);
         }
 
         [HttpDelete("{id:int}")]
@@ -60,8 +61,8 @@ namespace WebApiTutorial250818.WebApi.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
-            var ok = await _service.DeleteAsync(id, ct);
-            return ok ? NoContent() : NotFound();
+            var result = await _service.DeleteAsync(id, ct);
+            return result.ToActionResult(this);
         }
     }
 }

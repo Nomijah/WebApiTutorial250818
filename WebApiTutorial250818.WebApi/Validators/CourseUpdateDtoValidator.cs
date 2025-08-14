@@ -12,8 +12,7 @@ namespace WebApiTutorial250818.WebApi.Validators
                 .MaximumLength(150).WithMessage("Title cannot exceed 150 characters.");
 
             RuleFor(x => x.Credits)
-                .InclusiveBetween(0, 50).WithMessage("Credits must be between 0 and 50.")
-                .WithMessage("Credits must be a positive integer.");
+                .InclusiveBetween(0, 50).WithMessage("Credits must be between 0 and 50.");
         }
     }
 }

@@ -41,7 +41,7 @@ namespace WebApiTutorial250818.WebApi
 
             var app = builder.Build();
 
-            // Skapa DB och kör ev. pending migrations vid start (utbildningssyfte)
+            // Skapa DB och kör ev. pending migrations vid start
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<SchoolContext>();
@@ -50,6 +50,7 @@ namespace WebApiTutorial250818.WebApi
 
             if (app.Environment.IsDevelopment())
             {
+                // Fixed problem with Swagger not being able to read the OpenAPI version
                 app.UseSwagger(c =>
                 {
                     c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
