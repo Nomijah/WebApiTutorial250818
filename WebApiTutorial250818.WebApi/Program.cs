@@ -20,11 +20,13 @@ namespace WebApiTutorial250818.WebApi
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
 
             builder.Services.AddAutoMapper(typeof(Program)); // AutoMapper för DTOs
 
             builder.Services.AddControllers()
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson(); // Patchdoc med Newtonsoft.Json
 
             builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
             builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
@@ -34,7 +36,8 @@ namespace WebApiTutorial250818.WebApi
             {
                 o.SwaggerDoc("v1", new OpenApiInfo { Title = "School API", Version = "v1" });
             });
-            builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+            builder.Services.AddSwaggerGenNewtonsoftSupport(); // Patchdoc med Newtonsoft.Json
 
             var app = builder.Build();
 
@@ -45,8 +48,8 @@ namespace WebApiTutorial250818.WebApi
                 db.Database.Migrate(); // skapar db + kör migrations
             }
 
-            //if (app.Environment.IsDevelopment())
-            //{
+            if (app.Environment.IsDevelopment())
+            {
                 app.UseSwagger(c =>
                 {
                     c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
@@ -55,7 +58,7 @@ namespace WebApiTutorial250818.WebApi
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "School API v1");
                 });
-            //}
+            }
 
             app.UseHttpsRedirection();
             app.MapControllers();

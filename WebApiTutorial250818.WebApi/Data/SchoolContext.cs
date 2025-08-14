@@ -8,6 +8,7 @@ namespace WebApiTutorial250818.WebApi.Data
         public SchoolContext(DbContextOptions<SchoolContext> options) : base(options) { }
 
         public DbSet<Student> Students => Set<Student>();
+        public DbSet<Course> Courses => Set<Course>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -18,6 +19,13 @@ namespace WebApiTutorial250818.WebApi.Data
                 e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
                 e.Property(x => x.Email).HasMaxLength(255);
                 e.Property(x => x.BirthDate);
+            });
+
+            modelBuilder.Entity<Course>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Title).HasMaxLength(200).IsRequired();
+                e.Property(x => x.Credits).IsRequired();
             });
 
             // Seed-data
@@ -45,6 +53,27 @@ namespace WebApiTutorial250818.WebApi.Data
                     LastName = "Hopper",
                     Email = "grace.hopper@example.com",
                     BirthDate = new DateOnly(1906, 12, 9)
+                }
+            );
+
+            modelBuilder.Entity<Course>().HasData(
+                new Course
+                {
+                    Id = 1,
+                    Title = "Introduction to Computer Science",
+                    Credits = 7
+                },
+                new Course
+                {
+                    Id = 2,
+                    Title = "Algorithms and Data Structures",
+                    Credits = 6
+                },
+                new Course
+                {
+                    Id = 3,
+                    Title = "Database Systems",
+                    Credits = 5
                 }
             );
         }

@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Models;
 using WebApiTutorial250818.WebApi.Repositories;

@@ -1,20 +1,23 @@
 ﻿using FluentValidation;
 using WebApiTutorial250818.WebApi.DTOs;
 
-public class StudentUpdateDtoValidator : AbstractValidator<StudentUpdateDto>
+namespace WebApiTutorial250818.WebApi.Validators
 {
-    public StudentUpdateDtoValidator()
+    public class StudentUpdateDtoValidator : AbstractValidator<StudentUpdateDto>
     {
-        RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required.")
-            .MaximumLength(100);
+        public StudentUpdateDtoValidator()
+        {
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage("First name is required.")
+                .MaximumLength(100).WithMessage("First name cannot exceed 100 characters.");
 
-        RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required.")
-            .MaximumLength(100);
+            RuleFor(x => x.LastName)
+                .NotEmpty().WithMessage("Last name is required.")
+                .MaximumLength(100);
 
-        RuleFor(x => x.Email)
-            .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email))
-            .MaximumLength(255);
+            RuleFor(x => x.Email)
+                .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email))
+                .MaximumLength(255);
+        }
     }
 }
