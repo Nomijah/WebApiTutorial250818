@@ -28,6 +28,11 @@ namespace WebApiTutorial250818.WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<StudentReadDto>> Create([FromBody] StudentCreateDto dto, CancellationToken ct)
         {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
             var id = await _service.CreateAsync(dto, ct);
             var created = await _service.GetByIdAsync(id, ct);
             return CreatedAtAction(nameof(GetById), new { id }, created);
@@ -36,6 +41,10 @@ namespace WebApiTutorial250818.WebApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] StudentUpdateDto dto, CancellationToken ct)
         {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
             var ok = await _service.UpdateAsync(id, dto, ct);
             return ok ? NoContent() : NotFound();
         }

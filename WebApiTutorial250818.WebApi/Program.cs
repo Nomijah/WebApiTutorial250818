@@ -1,4 +1,6 @@
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using WebApiTutorial250818.WebApi.Data;
@@ -23,6 +25,10 @@ namespace WebApiTutorial250818.WebApi
 
             builder.Services.AddControllers()
                 .AddNewtonsoftJson();
+
+            builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(o =>
             {
