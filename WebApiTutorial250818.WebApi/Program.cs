@@ -12,7 +12,7 @@ namespace WebApiTutorial250818.WebApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // DbContext (SQLite)
+            // DbContext
             builder.Services.AddDbContext<SchoolContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
