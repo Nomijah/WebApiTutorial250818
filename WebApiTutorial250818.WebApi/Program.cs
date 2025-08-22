@@ -75,26 +75,26 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddSwaggerGen(o =>
             {
                 o.SwaggerDoc("v1", new OpenApiInfo { Title = "School API", Version = "v1" });
-                o.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme // Definiera säkerhetsdefinitionen för JWT
+                o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme // Definiera säkerhetsdefinitionen för JWT
                 {
                     Name = "Authorization",
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Type = SecuritySchemeType.Http,
                     Scheme = "bearer",
                     BearerFormat = "JWT",
-                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    In = ParameterLocation.Header,
                     Description = "Ange 'Bearer {token}'"
                 });
-                o.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement{
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme{
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference{
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+                o.AddSecurityRequirement(new OpenApiSecurityRequirement{
+                    {
+                        new OpenApiSecurityScheme{
+                            Reference = new OpenApiReference{
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
             builder.Services.AddSwaggerGenNewtonsoftSupport();
 
@@ -114,7 +114,7 @@ namespace WebApiTutorial250818.WebApi
             {
                 app.UseSwagger(c =>
                 {
-                    c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
+                    c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0;
                 });
                 app.UseSwaggerUI(c =>
                 {

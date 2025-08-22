@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Services;
@@ -6,6 +7,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CoursesController : ControllerBase
     {
         private readonly ICourseService _service;
@@ -13,6 +15,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         public CoursesController(ICourseService service) => _service = service;
 
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<CourseReadDto>), 200)]
         public async Task<ActionResult<IEnumerable<CourseReadDto>>> GetAll(CancellationToken ct)
             => Ok(await _service.GetAllAsync(ct));
