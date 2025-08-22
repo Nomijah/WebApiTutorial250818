@@ -1,8 +1,13 @@
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.Data;
 using WebApiTutorial250818.WebApi.Repositories;
 using WebApiTutorial250818.WebApi.Services;
@@ -14,14 +19,18 @@ namespace WebApiTutorial250818.WebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-           
+
             builder.Services.AddDbContext<SchoolContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<AuthDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             builder.Services.AddAutoMapper(typeof(Program)); // AutoMapper för DTOs
 
@@ -31,13 +40,66 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
             builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
 
+            // Identity
+            builder.Services
+                .AddIdentityCore<IdentityUser>(o =>
+                {
+                    o.User.RequireUniqueEmail = true; // Kräver unika e-postadresser
+                    o.Password.RequiredLength = 8; // Minsta längd för lösenord
+                })
+                .AddEntityFrameworkStores<AuthDbContext>() // Använd EF Core för Identity
+                .AddDefaultTokenProviders(); // Lägg till standard token providers för Identity
+
+            // JWT
+            var jwt = builder.Configuration.GetSection("Jwt");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
+
+            builder.Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(o =>
+                {
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+                        ValidIssuer = jwt["Issuer"],
+                        ValidAudience = jwt["Audience"],
+                        IssuerSigningKey = key,
+                        ClockSkew = TimeSpan.FromMinutes(1)
+                    };
+                });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(o =>
             {
                 o.SwaggerDoc("v1", new OpenApiInfo { Title = "School API", Version = "v1" });
+                o.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme // Definiera säkerhetsdefinitionen för JWT
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Ange 'Bearer {token}'"
+                });
+                o.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement{
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme{
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference{
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
             });
+            builder.Services.AddSwaggerGenNewtonsoftSupport();
 
-            builder.Services.AddSwaggerGenNewtonsoftSupport(); // Patchdoc med Newtonsoft.Json
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
@@ -59,6 +121,9 @@ namespace WebApiTutorial250818.WebApi
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "School API v1");
                 });
             }
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseHttpsRedirection();
             app.MapControllers();
