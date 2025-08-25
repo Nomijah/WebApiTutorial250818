@@ -70,8 +70,11 @@ namespace WebApiTutorial250818.WebApi
                     };
                 });
 
+            builder.Services.AddAuthorization();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
