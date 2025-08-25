@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using WebApiTutorial250818.WebApi.DTOs;
@@ -19,6 +20,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
             => Ok(await _service.GetAllAsync(ct));
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin, User")]
         public async Task<ActionResult<StudentReadDto>> GetById(int id, CancellationToken ct)
         {
             var result = await _service.GetByIdAsync(id, ct);
@@ -26,6 +28,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<StudentReadDto>> Create(
             [FromBody] StudentCreateDto dto, CancellationToken ct, IValidator<StudentCreateDto> validator)
         {
@@ -42,6 +45,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(
             int id, [FromBody] StudentUpdateDto dto, CancellationToken ct, IValidator<StudentUpdateDto> validator)
         {
@@ -56,6 +60,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var ok = await _service.DeleteAsync(id, ct);
