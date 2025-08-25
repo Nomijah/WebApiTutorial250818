@@ -1,5 +1,7 @@
 
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using WebApiTutorial250818.WebApi.Data;
 using WebApiTutorial250818.WebApi.Repositories;
 using WebApiTutorial250818.WebApi.Services;
@@ -19,6 +21,12 @@ namespace WebApiTutorial250818.WebApi
             // DI: Repository + Service
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+
+            builder.Services.AddAutoMapper(cfg => { }, typeof(Program)); // AutoMapper för DTOs
+
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
