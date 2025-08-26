@@ -8,7 +8,7 @@ namespace WebApiTutorial250818.WebApi.Auth
 {
     public interface IJwtTokenService
     {
-        string CreateToken(IdentityUser user, IEnumerable<string>? roles = null);
+        string CreateToken(User user, IEnumerable<string>? roles = null);
     }
     public class JwtTokenService : IJwtTokenService
     {
@@ -18,14 +18,14 @@ namespace WebApiTutorial250818.WebApi.Auth
             _cfg = cfg;
         }
 
-        public string CreateToken(IdentityUser user, IEnumerable<string>? roles = null)
+        public string CreateToken(User user, IEnumerable<string>? roles = null)
         {
             var jwt = _cfg.GetSection("Jwt");
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-                new (ClaimTypes.Name, user.UserName ?? user.Email ?? "")
+                new(ClaimTypes.Name, user.UserName ?? user.Email ?? "")
             };
 
             if (roles is not null)

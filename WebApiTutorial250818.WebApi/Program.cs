@@ -3,13 +3,14 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
+using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.Data;
 using WebApiTutorial250818.WebApi.Repositories;
 using WebApiTutorial250818.WebApi.Services;
-using Microsoft.OpenApi.Models;
 
 namespace WebApiTutorial250818.WebApi
 {
@@ -30,17 +31,20 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddAutoMapper(cfg => { }, typeof(Program)); // AutoMapper för DTOs
 
             builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
 
             // Microsoft Identity
-            builder.Services.AddIdentityCore<IdentityUser>(o =>
+            builder.Services.AddIdentityCore<User>(o =>
                 {
                     o.User.RequireUniqueEmail = true;
                     o.Password.RequiredLength = 8;
                 })
+                .AddRoles<IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -64,7 +68,19 @@ namespace WebApiTutorial250818.WebApi
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
                 });
-            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthorization(o =>
+            {
+                o.AddPolicy("MustBeSchoolEmail", policy =>
+                {
+                    policy.RequireAssertion(context =>
+                        context.User.Identity is not null &&
+                        context.User.Identity.IsAuthenticated &&
+                        context.User.HasClaim(c =>
+                            c.Type == ClaimTypes.Email &&
+                            c.Value.EndsWith("@school.local", StringComparison.OrdinalIgnoreCase)));
+                });
+            });
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

@@ -15,8 +15,8 @@ namespace WebApiTutorial250818.WebApi.Validators
                 .NotEmpty().WithMessage("Last name is required.")
                 .MaximumLength(100);
 
-            RuleFor(x => x.Email)
-                .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email))
+            RuleFor(x => x.PersonalEmail)
+                .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.PersonalEmail))
                 .MaximumLength(255);
         }
     }

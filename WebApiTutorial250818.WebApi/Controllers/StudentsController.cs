@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Services;
 
@@ -11,14 +13,21 @@ namespace WebApiTutorial250818.WebApi.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IStudentService _service;
+        private readonly UserManager<User> _users;
 
-        public StudentsController(IStudentService service) => _service = service;
+        public StudentsController(IStudentService service, UserManager<User> users)
+        {
+            _service = service;
+            _users = users;    
+        }
 
         [HttpGet]
+        [Authorize(Policy = "MustBeSchoolEmail")]
         public async Task<ActionResult<IEnumerable<StudentReadDto>>> GetAll(CancellationToken ct)
             => Ok(await _service.GetAllAsync(ct));
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin, User")]
         public async Task<ActionResult<StudentReadDto>> GetById(int id, CancellationToken ct)
         {
             var result = await _service.GetByIdAsync(id, ct);
@@ -26,6 +35,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<StudentReadDto>> Create(
             [FromBody] StudentCreateDto dto, CancellationToken ct, IValidator<StudentCreateDto> validator)
         {
@@ -42,6 +52,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(
             int id, [FromBody] StudentUpdateDto dto, CancellationToken ct, IValidator<StudentUpdateDto> validator)
         {
@@ -56,6 +67,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var ok = await _service.DeleteAsync(id, ct);
