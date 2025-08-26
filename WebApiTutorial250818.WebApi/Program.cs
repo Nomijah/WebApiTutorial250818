@@ -3,13 +3,13 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
+using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.Data;
 using WebApiTutorial250818.WebApi.Repositories;
 using WebApiTutorial250818.WebApi.Services;
-using Microsoft.OpenApi.Models;
 
 namespace WebApiTutorial250818.WebApi
 {
@@ -30,6 +30,7 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             builder.Services.AddAutoMapper(cfg => { }, typeof(Program)); // AutoMapper för DTOs
 
@@ -41,6 +42,7 @@ namespace WebApiTutorial250818.WebApi
                     o.User.RequireUniqueEmail = true;
                     o.Password.RequiredLength = 8;
                 })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders();
 
