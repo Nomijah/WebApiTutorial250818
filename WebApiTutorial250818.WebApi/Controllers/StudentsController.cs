@@ -15,6 +15,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         public StudentsController(IStudentService service) => _service = service;
 
         [HttpGet]
+        [Authorize(Policy = "MustBeSchoolEmail")]
         public async Task<ActionResult<IEnumerable<StudentReadDto>>> GetAll(CancellationToken ct)
             => Ok(await _service.GetAllAsync(ct));
 

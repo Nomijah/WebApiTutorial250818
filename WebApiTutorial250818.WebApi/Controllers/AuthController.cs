@@ -28,7 +28,8 @@ namespace WebApiTutorial250818.WebApi.Controllers
             {
                 return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
             }
-            
+
+            await _users.AddToRoleAsync(user, "user");
             return StatusCode(201);
         }
 

@@ -25,7 +25,7 @@ namespace WebApiTutorial250818.WebApi.Auth
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id),
                 new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-                new (ClaimTypes.Name, user.UserName ?? user.Email ?? "")
+                new(ClaimTypes.Name, user.UserName ?? user.Email ?? "")
             };
 
             if (roles is not null)

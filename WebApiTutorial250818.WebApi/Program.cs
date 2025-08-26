@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.Data;
@@ -66,7 +67,19 @@ namespace WebApiTutorial250818.WebApi
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
                 });
-            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthorization(o =>
+            {
+                o.AddPolicy("MustBeSchoolEmail", policy =>
+                {
+                    policy.RequireAssertion(context =>
+                        context.User.Identity is not null &&
+                        context.User.Identity.IsAuthenticated &&
+                        context.User.HasClaim(c =>
+                            c.Type == ClaimTypes.Email &&
+                            c.Value.EndsWith("@school.local", StringComparison.OrdinalIgnoreCase)));
+                });
+            });
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
