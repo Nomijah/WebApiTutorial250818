@@ -9,6 +9,10 @@ namespace WebApiTutorial250818.WebApi.Data
 
         public DbSet<Student> Students => Set<Student>();
         public DbSet<Course> Courses => Set<Course>();
+        public DbSet<Teacher> Teachers => Set<Teacher>();
+        public DbSet<Department> Departments => Set<Department>();
+        public DbSet<TeacherDepartment> TeacherDepartments => Set<TeacherDepartment>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -17,7 +21,7 @@ namespace WebApiTutorial250818.WebApi.Data
                 e.HasKey(x => x.Id);
                 e.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
                 e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
-                e.Property(x => x.Email).HasMaxLength(255);
+                e.Property(x => x.PersonalEmail).HasMaxLength(255);
                 e.Property(x => x.BirthDate);
             });
 
@@ -28,6 +32,29 @@ namespace WebApiTutorial250818.WebApi.Data
                 e.Property(x => x.Credits).IsRequired();
             });
 
+            modelBuilder.Entity<Department>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+                e.Property(x => x.Description).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<Teacher>(t =>
+            {
+                t.HasKey(x => x.Id);
+                t.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
+                t.Property(x => x.LastName).HasMaxLength(100).IsRequired();
+                t.Property(x => x.PersonalEmail).HasMaxLength(255);
+                t.Property(x => x.BirthDate);
+            });
+
+            modelBuilder.Entity<TeacherDepartment>(td =>
+            {
+                td.HasKey(t => new { t.TeacherId, t.DepartmentId });
+                td.HasOne(t => t.Teacher).WithMany().HasForeignKey(t => t.TeacherId);
+                td.HasOne(d => d.Department).WithMany().HasForeignKey(d => d.DepartmentId);
+            });
+
             // Seed-data
             modelBuilder.Entity<Student>().HasData(
                 new Student
@@ -35,7 +62,7 @@ namespace WebApiTutorial250818.WebApi.Data
                     Id = 1,
                     FirstName = "Ada",
                     LastName = "Lovelace",
-                    Email = "ada.lovelace@example.com",
+                    PersonalEmail = "ada.lovelace@example.com",
                     BirthDate = new DateOnly(1815, 12, 10)
                 },
                 new Student
@@ -43,7 +70,7 @@ namespace WebApiTutorial250818.WebApi.Data
                     Id = 2,
                     FirstName = "Alan",
                     LastName = "Turing",
-                    Email = "alan.turing@example.com",
+                    PersonalEmail = "alan.turing@example.com",
                     BirthDate = new DateOnly(1912, 6, 23)
                 },
                 new Student
@@ -51,7 +78,7 @@ namespace WebApiTutorial250818.WebApi.Data
                     Id = 3,
                     FirstName = "Grace",
                     LastName = "Hopper",
-                    Email = "grace.hopper@example.com",
+                    PersonalEmail = "grace.hopper@example.com",
                     BirthDate = new DateOnly(1906, 12, 9)
                 }
             );
@@ -76,6 +103,64 @@ namespace WebApiTutorial250818.WebApi.Data
                     Credits = 5
                 }
             );
+
+            // Seed Departments
+            modelBuilder.Entity<Department>().HasData(
+                new Department
+                {
+                    Id = 1,
+                    Name = "Computer Science",
+                    Description = "Department of Computer Science"
+                },
+                new Department
+                {
+                    Id = 2,
+                    Name = "Mathematics",
+                    Description = "Department of Mathematics"
+                }
+            );
+
+            // Seed Teachers
+            modelBuilder.Entity<Teacher>().HasData(
+                new Teacher
+                {
+                    Id = 1,
+                    FirstName = "Donald",
+                    LastName = "Knuth",
+                    PersonalEmail = "donald.knuth@example.com",
+                    BirthDate = new DateOnly(1938, 1, 10),
+                    UserId = null
+                },
+                new Teacher
+                {
+                    Id = 2,
+                    FirstName = "Barbara",
+                    LastName = "Liskov",
+                    PersonalEmail = "barbara.liskov@example.com",
+                    BirthDate = new DateOnly(1939, 11, 7),
+                    UserId = null
+                }
+            );
+
+            modelBuilder.Entity<TeacherDepartment>().HasData(
+                new TeacherDepartment
+                {
+                    TeacherId = 1,
+                    DepartmentId = 1
+                },
+                new TeacherDepartment
+                {
+                    TeacherId = 2,
+                    DepartmentId = 1
+                },
+                new TeacherDepartment
+                {
+                    TeacherId = 2,
+                    DepartmentId = 2
+                }
+            );
+
+
         }
     }
 }

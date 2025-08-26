@@ -16,6 +16,11 @@ namespace WebApiTutorial250818.WebApi.Repositories
         public Task<Student?> GetByIdAsync(int id, CancellationToken ct = default) =>
             _ctx.Students.FirstOrDefaultAsync(s => s.Id == id, ct);
 
+        public Task<Student?> GetByUserIdAsync(string userId, CancellationToken ct = default)
+        {
+            return _ctx.Students.AsNoTracking().FirstOrDefaultAsync(s => s.UserId.ToString() == userId, ct);
+        }
+
         public async Task AddAsync(Student student, CancellationToken ct = default)
         {
             await _ctx.Students.AddAsync(student, ct);

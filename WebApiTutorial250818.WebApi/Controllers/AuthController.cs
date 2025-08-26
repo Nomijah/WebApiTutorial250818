@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApiTutorial250818.WebApi.Auth;
+using WebApiTutorial250818.WebApi.DTOs;
 
 namespace WebApiTutorial250818.WebApi.Controllers
 {
@@ -8,13 +11,15 @@ namespace WebApiTutorial250818.WebApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _users;
+        private readonly UserManager<User> _users;
         private readonly IJwtTokenService _tokens;
+        private readonly IAuthService _authService;
 
-        public AuthController(UserManager<IdentityUser> users, IJwtTokenService tokens)
+        public AuthController(UserManager<User> users, IJwtTokenService tokens, IAuthService authService)
         {
             _users = users;
             _tokens = tokens;
+            _authService = authService;
         }
 
         [HttpPost("register")]
@@ -22,7 +27,7 @@ namespace WebApiTutorial250818.WebApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            var user = new IdentityUser { UserName = dto.Email, Email = dto.Email };
+            var user = new User { UserName = dto.Email, Email = dto.Email };
             IdentityResult result = await _users.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
@@ -55,6 +60,34 @@ namespace WebApiTutorial250818.WebApi.Controllers
 
             var token = _tokens.CreateToken(user, roles);
             return Ok(new AuthResponseDto(token));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> ConnectStudent([FromBody] ConnectStudentDto dto)
+        {
+            var result = await _authService.ConnectStudent(dto.StudentId, dto.UserId);
+            return result ? NoContent() : NotFound();
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<StudentReadDto>> Me()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            // Get the user from the database
+            var user = await _users.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return NotFound();
+            }
+
+            var result = await _authService.GetStudentData(userId);
+            return result is null ? NotFound() : Ok(result);
         }
     }
 }

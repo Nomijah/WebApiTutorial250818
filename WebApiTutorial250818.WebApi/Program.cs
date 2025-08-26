@@ -32,18 +32,19 @@ namespace WebApiTutorial250818.WebApi
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddAutoMapper(cfg => { }, typeof(Program)); // AutoMapper för DTOs
 
             builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // Registrera validators
 
             // Microsoft Identity
-            builder.Services.AddIdentityCore<IdentityUser>(o =>
+            builder.Services.AddIdentityCore<User>(o =>
                 {
                     o.User.RequireUniqueEmail = true;
                     o.Password.RequiredLength = 8;
                 })
-                .AddRoles<IdentityRole>()
+                .AddRoles<IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders();
 

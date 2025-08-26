@@ -1,4 +1,5 @@
 ﻿using WebApiTutorial250818.WebApi.DTOs;
+using WebApiTutorial250818.WebApi.Models;
 
 namespace WebApiTutorial250818.WebApi.Services
 {

@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using WebApiTutorial250818.WebApi.Auth;
 using WebApiTutorial250818.WebApi.DTOs;
 using WebApiTutorial250818.WebApi.Services;
 
@@ -11,8 +13,13 @@ namespace WebApiTutorial250818.WebApi.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IStudentService _service;
+        private readonly UserManager<User> _users;
 
-        public StudentsController(IStudentService service) => _service = service;
+        public StudentsController(IStudentService service, UserManager<User> users)
+        {
+            _service = service;
+            _users = users;    
+        }
 
         [HttpGet]
         [Authorize(Policy = "MustBeSchoolEmail")]
